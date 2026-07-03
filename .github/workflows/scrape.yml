@@ -1,0 +1,41 @@
+name: Hiru Tamil News Scraper
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
+
+concurrency:
+  group: hiru-scraper
+  cancel-in-progress: false   # never kill a mid-write run; let it finish and commit
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10   # safety valve well under the 15-min schedule interval
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python scraper.py
+        env:
+          MAX_ARTICLES_PER_RUN: "60"
+          MAX_CONSECUTIVE_MISSES: "6"
+
+      - name: Commit and push new articles
+        run: |
+          git config user.name "hiru-scraper-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add hiru_tamil status.json failed_ids.txt
+          git diff --cached --quiet || git commit -m "Scrape: $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
