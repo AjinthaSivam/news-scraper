@@ -42,7 +42,10 @@ HEADERS = {
     "User-Agent": os.environ.get(
         "SCRAPER_USER_AGENT",
         "Mozilla/5.0 (compatible; TamilNLPResearchBot/1.0; research use)",
-    )
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ta,en-US;q=0.7,en;q=0.3",
+    "Referer": "https://hirunews.lk/tm/",
 }
 
 logging.basicConfig(
